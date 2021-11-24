@@ -64,24 +64,4 @@ def split(signal, sampling_rate, window_width, sliding_step):
 
 signal, sampling_rate = read_wavfile("../data/arctic_a0001.wav")
 
-windows = split(signal, sampling_rate, 1000, 500)
-
-w1 = signal[:16000]
-print((w1 == windows[0]).all())
-
-w2 = signal[24000:40000]
-print((w2 == windows[1]).all()) 
-
-
-
-
-plt.subplot(311)
-plt.plot(windows[0])
-plt.subplot(312)
-plt.plot(windows[1])
-plt.subplot(313)
-plt.plot(signal[24000:40000])
-
-plt.show()
-
 #data/arctic_a0001.wav

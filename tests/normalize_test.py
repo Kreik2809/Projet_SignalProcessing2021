@@ -1,5 +1,9 @@
-import main.utils
+import sys
 
+sys.path.insert(1, '../')
+sys.path.insert(1, '../src')
+
+from src.main import utils
 
 signal, sampling_rate = utils.read_wavfile("../data/arctic_a0001.wav")
 
