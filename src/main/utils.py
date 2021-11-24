@@ -29,10 +29,13 @@ def normalize(signal):
 
     return signal/norm
 """
-    Normalize a signal in order to make his value ranges from -1 to 1.
+Split the signal in windows seperate by a step
       @signal : the signal [ndarray]
+      @sampling_rate : the sampling rate of the signal [int]
+      @window_width : the window size in ms [int]
+      @sliding_step : the sliding step in ms [int]
 
-      @return : the normalized signal [ndarray]
+      @return : windows generated [list]
 """
 def split(signal, sampling_rate, window_width, sliding_step):
     window_samples = sampling_rate * (window_width/1000)
@@ -95,7 +98,7 @@ def auto_correlation_pitch_estim(path):
 
     #2.
     signal = normalize(signal)
-    plt.subplot(211)
+    plt.subplot(311)
     plt.plot(signal)
     
     #3.
@@ -103,8 +106,24 @@ def auto_correlation_pitch_estim(path):
     list_energies = []
     for s in frames:
         list_energies.append(compute_energy(s))
-    plt.subplot(212)
+    plt.subplot(312)
     plt.plot(list_energies)
+    
+    #5.
+    tresh = 40
+    voiced_segments = []
+    for i in range(len(list_energies)):
+        if list_energies[i] >= tresh:
+            voiced_segments.append(frames[i])
+    
+    #Test to evaluate tresh value
+    voiced_signal = []
+    for s in voiced_segments:
+        voiced_signal.extend(s)
+    plt.subplot(313)
+    plt.plot(voiced_signal)
+    
+    #6.
     plt.show()
 
 auto_correlation_pitch_estim("../../data/bdl")
@@ -112,4 +131,3 @@ auto_correlation_pitch_estim("../../data/bdl")
 
 
 
-#data/arctic_a0001.wav
