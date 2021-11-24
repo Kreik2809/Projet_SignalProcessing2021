@@ -30,14 +30,42 @@ def split(signal, sampling_rate, window_width, sliding_step):
     windows = []
     count = 0
     current_win = []
+    is_window = True
+    is_step = False
     for i in range(len(signal)):
-            current_win.append(signal[i]
+        if is_window:
+            if count < window_samples:
+                current_win.append(signal[i])
+                count = count + 1 
+                print(count)
+            else:
+                windows.append(current_win)
+                current_win = []
+                count = 0
+                is_window = False
+                is_step = True
+        if(is_step):
+            if count < sliding_samples:
+                count += 1
+            else:
+                print("hey2")
+                count = 0
+                is_window = True
+                is_step = False
 
+    if is_window:
+        windows.append(current_win)
 
+    return windows
 
 signal, sampling_rate = read_wavfile("data/arctic_a0001.wav")
 
-
+windows = split(normalize(signal), sampling_rate, 1000, 500)
+plt.subplot(311)
+plt.plot(windows[0])
+plt.subplot(312)
+plt.plot(windows[1])
+plt.subplot(313)
 plt.plot(normalize(signal))
 
 plt.show()
