@@ -12,7 +12,7 @@ def read_wavfile(path):
 """
     Normalize a signal in order to make his value range from -1 to 1.
 """
-def normalize_1(signal):
+def normalize(signal):
     min_value = abs(min(signal)) 
     max_value = abs(max(signal))
 
