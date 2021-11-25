@@ -30,7 +30,7 @@ def normalize(signal):
 
     return signal/norm
 """
-Split the signal in windows seperate by a step
+Split the signal in frames with an overlapping step.
       @signal : the signal [ndarray]
       @sampling_rate : the sampling rate of the signal [int]
       @window_width : the window size in ms [int]
