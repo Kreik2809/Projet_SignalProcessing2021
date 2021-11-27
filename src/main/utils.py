@@ -77,7 +77,7 @@ def auto_correlation_pitch_estim(path_1):
     
     #3.
     list_energies_1 = []
-    frames_1 = split(signal_1, sampling_rate, 50, 25)
+    frames_1 = split(signal_1, sampling_rate, 50, 15)
     for s in frames_1:
         list_energies_1.append(compute_energy(s))
 
@@ -85,7 +85,7 @@ def auto_correlation_pitch_estim(path_1):
     plt.plot(list_energies_1)
     
     #5.
-    tresh = 20
+    tresh = 10
     voiced_segments_1 = []
     for i in range(len(list_energies_1)):
         if list_energies_1[i] >= tresh:
@@ -114,6 +114,14 @@ def auto_correlation_pitch_estim(path_1):
     plt.plot(c)
     plt.subplot(212)
     plt.plot(lags)
+
+    peaks = signal.find_peaks(c)
+
+    diff_samples = peaks[0][1] - peaks[0][0]
+
+    time = diff_samples/16000 #sampling rate
+    pitch = 1 / time
+    print(pitch)
     plt.show()
 
 
