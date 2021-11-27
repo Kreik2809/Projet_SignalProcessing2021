@@ -59,7 +59,7 @@ def compute_energy(signal):
 """
     path of the directory where utterances are stored
 """
-def auto_correlation_pitch_estim(path_1, path_2):
+def auto_correlation_pitch_estim(path_1):
     #1.
     os.chdir(path_1)
     files = glob.glob("*.wav")
@@ -70,66 +70,46 @@ def auto_correlation_pitch_estim(path_1, path_2):
         current_signal, sampling_rate = read_wavfile(file)
         signal_1.extend(current_signal)
     
-    os.chdir(path_2)
-    files = glob.glob("*.wav")
-
-    choosed_files = random.sample(files, 5)
-    signal_2 = []
-    for file in choosed_files: 
-        current_signal, sampling_rate = read_wavfile(file)
-        signal_2.extend(current_signal)
-
-    
     #2.
     signal_1 = normalize(signal_1)
-    signal_2 = normalize(signal_2)
     plt.subplot(311)
-    plt.plot(signal_2)
+    plt.plot(signal_1)
     
     #3.
     list_energies_1 = []
-    list_energies_2 = []
-    frames_1 = split(signal_1, sampling_rate, 50, 50)
-    frames_2 = split(signal_2, sampling_rate, 50, 50)
+    frames_1 = split(signal_1, sampling_rate, 50, 25)
     for s in frames_1:
         list_energies_1.append(compute_energy(s))
 
-    for s in frames_2:
-        list_energies_2.append(compute_energy(s))
-
     plt.subplot(312)
     plt.plot(list_energies_1)
-    plt.plot(list_energies_2)
     
     #5.
     tresh = 20
     voiced_segments_1 = []
-    voiced_segments_2 = []
     for i in range(len(list_energies_1)):
         if list_energies_1[i] >= tresh:
             voiced_segments_1.append(frames_1[i])
         
-    for i in range(len(list_energies_2)):
-        if list_energies_2[i] >= tresh:
-            voiced_segments_2.append(frames_2[i])
-
     #Test to evaluate tresh value
     voiced_signal_1 = []
-    voiced_signal_2 = []
     for s in voiced_segments_1:
         voiced_signal_1.extend(s)
-    for s in voiced_segments_2:
-        voiced_signal_2.extend(s)
     plt.subplot(313)
-    plt.plot(voiced_signal_2)
+    plt.plot(voiced_signal_1)
     plt.show()        
 
     #6.
     #the two correlated signals must be of same length
-    maxl = max(len(voiced_signal_1), len(voiced_signal_2))
-    voiced_signal_1.extend(np.zeros(maxl-len(voiced_signal_1)))
-    voiced_signal_2.extend(np.zeros(maxl-len(voiced_signal_2)))
-    lags, c = xcorr.xcorr(voiced_signal_1, voiced_signal_2, maxlags=100)
+    
+    c = voiced_segments_1[0]
+    for segment in voiced_segments_1[1:]:
+        if (len(c) != len(segment) ):
+            maxl = max(len(c), len(segment))
+            c = np.hstack([c, np.zeros(maxl-len(c))])
+            segment = np.hstack([segment, np.zeros(maxl-len(segment))])
+        lags, c = xcorr.xcorr(c, segment, maxlags=100)
+
     plt.subplot(211)
     plt.plot(c)
     plt.subplot(212)
@@ -137,5 +117,5 @@ def auto_correlation_pitch_estim(path_1, path_2):
     plt.show()
 
 
-auto_correlation_pitch_estim("../../data/bdl_a", "../../data/bdl_b")
+auto_correlation_pitch_estim("../../data/bdl_a")
 
