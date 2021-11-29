@@ -72,20 +72,20 @@ def auto_correlation_pitch_estim(path_1):
     
     #2.
     signal_1 = normalize(signal_1)
-    plt.subplot(311)
+    plt.subplot(411)
     plt.plot(signal_1)
     
     #3.
     list_energies_1 = []
-    frames_1 = split(signal_1, sampling_rate, 50, 15)
+    frames_1 = split(signal_1, sampling_rate, 50, 25)
     for s in frames_1:
         list_energies_1.append(compute_energy(s))
 
-    plt.subplot(312)
+    plt.subplot(412)
     plt.plot(list_energies_1)
     
     #5.
-    tresh = 10
+    tresh = 5
     voiced_segments_1 = []
     for i in range(len(list_energies_1)):
         if list_energies_1[i] >= tresh:
@@ -95,9 +95,8 @@ def auto_correlation_pitch_estim(path_1):
     voiced_signal_1 = []
     for s in voiced_segments_1:
         voiced_signal_1.extend(s)
-    plt.subplot(313)
+    plt.subplot(413)
     plt.plot(voiced_signal_1)
-    plt.show()        
 
     #6.
     #the two correlated signals must be of same length
@@ -109,21 +108,30 @@ def auto_correlation_pitch_estim(path_1):
             c = np.hstack([c, np.zeros(maxl-len(c))])
             segment = np.hstack([segment, np.zeros(maxl-len(segment))])
         lags, c = xcorr.xcorr(c, segment, maxlags=100)
-
-    plt.subplot(211)
+    
+    plt.subplot(414)
     plt.plot(c)
-    plt.subplot(212)
-    plt.plot(lags)
 
     peaks = signal.find_peaks(c)
 
     diff_samples = peaks[0][1] - peaks[0][0]
 
     time = diff_samples/16000 #sampling rate
-    pitch = 1 / time
+    pitch = 16000/diff_samples
     print(pitch)
     plt.show()
+    return pitch
+    
+if __name__ == "__main__":
+	"""
+	res = []
+	for i in range(10):
+	    res.append(auto_correlation_pitch_estim("../../data/slt_a"))
 
+	print(res)
+	print(np.mean(res))
+	print(np.std(res))
+	"""
+	auto_correlation_pitch_estim("data/bdl_a")
 
-auto_correlation_pitch_estim("../../data/bdl_a")
 

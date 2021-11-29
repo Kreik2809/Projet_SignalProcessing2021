@@ -1,9 +1,9 @@
 import sys
-sys.path.insert(1, '../')
-sys.path.insert(1, '../src')
-from src.main import utils
+sys.path.append("..")
+sys.path.append("../main")
+from main import utils
 
-signal, sampling_rate = utils.read_wavfile("../data/arctic_a0001.wav")
+signal, sampling_rate = utils.read_wavfile("../../data/bdl_a/arctic_a0001.wav")
 
 windows = utils.split(signal, sampling_rate, 1000, 500)
  
