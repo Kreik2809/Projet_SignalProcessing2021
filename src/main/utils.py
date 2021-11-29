@@ -30,7 +30,7 @@ def normalize(signal):
 
     return signal/norm
 """
-Split the signal in frames with an overlapping step.
+    Split the signal in frames with an overlapping step.
       @signal : the signal [ndarray]
       @sampling_rate : the sampling rate of the signal [int]
       @window_width : the window size in ms [int]
@@ -121,17 +121,38 @@ def auto_correlation_pitch_estim(path_1):
     print(pitch)
     plt.show()
     return pitch
-    
+
+
+def compute_formants(audiofile):
+	#1.
+	current_signal, sampling_rate = read_wavfile(audiofile) 
+	windows = split(normalize(current_signal), sampling_rate, 50, 25) 
+	plt.subplot(211)
+	plt.plot(windows[20])
+	#2.
+	A = [1]
+	B = [1, -0.67]  
+	new_windows = []
+	for frame in windows:
+		new_windows.append(signal.lfilter(B, A, frame))
+	plt.subplot(212)
+	plt.plot(new_windows[20])
+	plt.show()
+
+
+
+
 if __name__ == "__main__":
 	"""
 	res = []
 	for i in range(10):
-	    res.append(auto_correlation_pitch_estim("../../data/slt_a"))
+		res.append(auto_correlation_pitch_estim("../../data/slt_a"))
 
 	print(res)
 	print(np.mean(res))
 	print(np.std(res))
 	"""
-	auto_correlation_pitch_estim("data/bdl_a")
+	#auto_correlation_pitch_estim("data/bdl_a")
 
+	compute_formants("data/bdl_a/arctic_a0001.wav")
 
