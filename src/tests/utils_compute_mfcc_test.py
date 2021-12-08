@@ -7,13 +7,13 @@ import random
 import numpy as np
 
 
-class Autocorrelation_pitch_estim_test(unittest.TestCase):
+class Compute_mfcc_test(unittest.TestCase):
         
     """
         Unit test to test if the speaker is a man in the audio
     """
     def test_01(self):
-        pitch_men = utils.autocorrelation_pitch_estim("data/bdl_a")
+        values = utils.compute_mfcc("../../data/slt_a/arctic_a0001.wav")
         self.assertTrue(pitch_men >= 60, "")
         self.assertTrue(pitch_men <= 170, "")
 
@@ -21,9 +21,9 @@ class Autocorrelation_pitch_estim_test(unittest.TestCase):
         Unit test to test if the speaker is a women in the audio
     """
     def test_02(self):
-        pitch_women = utils.autocorrelation_pitch_estim("data/slt_a")
+        pitch_women = utils.cepstrum_pitch_estim("data/slt_a")
         self.assertTrue(pitch_women >= 171, "")
         self.assertTrue(pitch_women <= 300, "")
         
 if __name__ == "__main__":
-   unittest.main()      
+   unittest.main()

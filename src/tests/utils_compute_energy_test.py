@@ -18,4 +18,4 @@ class Compute_energy_test(unittest.TestCase):
         self.assertTrue(energy >= 0, "")
         
 if __name__ == "__main__":
-   unittest.main()      
+   unittest.main()

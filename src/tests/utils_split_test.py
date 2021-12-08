@@ -37,4 +37,4 @@ class Split_test(unittest.TestCase):
         self.assertFalse((tab[20:40] == windows[1]).all(), "Wrong frame test")
         
 if __name__ == "__main__":
-   unittest.main()      
+   unittest.main()

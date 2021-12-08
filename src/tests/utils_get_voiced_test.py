@@ -20,4 +20,4 @@ class Get_voice_test(unittest.TestCase):
         self.assertTrue(voiced_segments >= 1, "")
         
 if __name__ == "__main__":
-   unittest.main()      
+   unittest.main()

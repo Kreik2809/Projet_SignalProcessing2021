@@ -28,4 +28,4 @@ class Normalize_test(unittest.TestCase):
         self.assertTrue(minimum >= -1, "")
 
 if __name__ == "__main__":
-   unittest.main() 
+   unittest.main()
