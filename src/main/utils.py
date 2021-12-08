@@ -4,8 +4,10 @@ import numpy.lib.stride_tricks as npst
 import matplotlib.pyplot as plt
 from scipy import signal, fft
 import glob, os, random
-import xcorr
 
+import scipy
+import xcorr
+import scikit_talkbox_lpc as scilpc
 
 def read_wavfile(path):
     """
@@ -174,27 +176,48 @@ def cepstrum_pitch_estim(path):
 
 def compute_formants(audiofile):
 	#1.
-	current_signal, sampling_rate = read_wavfile(audiofile) 
-	windows = split(normalize(current_signal), sampling_rate, 50, 25) 
-	plt.subplot(211)
-	plt.plot(windows[20])
-	#2.
-	A = [1]
-	B = [1, -0.67]  
-	new_windows = []
-	for frame in windows:
-		new_windows.append(signal.lfilter(B, A, frame))
-	plt.subplot(212)
-	plt.plot(new_windows[20])
-	plt.show()
+    current_signal, sampling_rate = read_wavfile(audiofile) 
+    frames = split(normalize(current_signal), sampling_rate, 50, 25) 
+    #2.
+    A = [1]
+    B = [1, -0.67]  
+    new_frame = []
+    lpc_order = int(2 + (sampling_rate/1000))
+    for frame in frames:
+        filtered_frame =  signal.lfilter(B, A, frame)
+        window = signal.hamming(len(filtered_frame))
+        windowed_frame = filtered_frame * window
+        lpc = scilpc.lpc_ref(windowed_frame, 10)
+        roots = np.roots(lpc)
+        values = []
+        for r in roots:
+            if (np.imag(r) > 0):
+                angle = np.arctan2(np.imag(r), np.real(r))
+                values.append(angle * ((sampling_rate/10)/2*np.pi))
+        values.sort()
+        print(values)
 
-
-
+def compute_mfcc(audiofile):
+    current_signal, sampling_rate = read_wavfile(audiofile)
+    A= [1]
+    B= [1,-0.97]
+    emphasized_signal = signal.lfilter(B,A,current_signal)
+    frames= split(emphasized_signal,sampling_rate, 50, 25)
+    windowed_frames = []
+    for frame in frames : 
+        window= signal.hamming(len(frame))
+        windowed_frames.append(window*frame)
+    ndft=512
+    power_spectrum= pow(abs(fft.fft(windowed_frames)),2)/ndft
+    filter_bank_values = filterbanks.filter_banks(power_spectrum, sampling_rate)
+    dcted_filter_bank_values = fft.dct(filter_bank_values, norm=' ortho')
+    dcted_filter_bank_values = dcted_filter_bank_values[0:13]
+    plt.plot(dcted_filter_bank_values)
+    plt.show()
 
 if __name__ == "__main__":
-    pitch_1 = autocorrelation_pitch_estim("data/slt_a")
-    pitch_2 = cepstrum_pitch_estim("data/slt_a")
-    print(pitch_1)
-    print(pitch_2)
-	#compute_formants("data/bdl_a/arctic_a0001.wav")
-
+    #pitch_1 = autocorrelation_pitch_estim("data/slt_a")
+    #pitch_2 = cepstrum_pitch_estim("data/slt_a")
+    #print(pitch_1)
+    #print(pitch_2)
+    compute_formants("data/slt_a/arctic_a0001.wav")
