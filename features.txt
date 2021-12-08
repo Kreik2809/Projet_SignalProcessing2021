@@ -1,0 +1,7 @@
+pitch = male : [60, 180]
+	female = [160, 300]
+
+formant = male : 
+	   female :
+
+mfcc = 

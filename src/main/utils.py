@@ -178,18 +178,19 @@ def cepstrum_pitch_estim(path):
 def compute_formants(audiofile):
 	#1.
     current_signal, sampling_rate = read_wavfile(audiofile) 
-    frames = split(normalize(current_signal), sampling_rate, 50, 25) 
+    current_signal = normalize(current_signal)
+    frames = split(normalize(current_signal), sampling_rate, 25, 20) 
     #2.
     A = [1]
     B = [1, -0.67]  
-    new_frame = []
     lpc_order = int(2 + (sampling_rate/1000))
     formants = []
-    for frame in frames:
+    voiced, unvoiced = get_voiced(frames, 5)
+    for frame in voiced:
         filtered_frame =  signal.lfilter(B, A, frame)
         window = signal.hamming(len(filtered_frame))
         windowed_frame = filtered_frame * window
-        lpc = scilpc.lpc_ref(windowed_frame, 10)
+        lpc = scilpc.lpc_ref(windowed_frame, lpc_order)
         roots = np.roots(lpc)
         values = []
         for r in roots:
@@ -203,6 +204,7 @@ def compute_formants(audiofile):
 def compute_mfcc(audiofile):
     #1.
     current_signal, sampling_rate = read_wavfile(audiofile)
+    current_signal = normalize(current_signal)
     A= [1]
     B= [1,-0.97]
     emphasized_signal = signal.lfilter(B,A,current_signal)
@@ -224,7 +226,21 @@ if __name__ == "__main__":
     #pitch_2 = cepstrum_pitch_estim("data/slt_a")
     #print(pitch_1)
     #print(pitch_2)
-    formants = compute_formants("data/rms_a/arctic_a0001.wav")
+    formants = compute_formants("data/bdl_a/arctic_a0001.wav")
+    acc = 0
+    i = 0
+    f1_list = []
+    f2_list = []
     for f in formants:
         print(f)
+        f1 = f[0]
+        f2 = f[1]
+        f1_list.append(f1)
+        f2_list.append(f2)
+
+    print(np.mean(f1_list))
+    print(np.mean(f2_list))
+
+
+
     #compute_mfcc("data/slt_a/arctic_a0001.wav")
