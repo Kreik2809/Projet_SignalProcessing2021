@@ -8,6 +8,7 @@ import glob, os, random
 import scipy
 import xcorr
 import scikit_talkbox_lpc as scilpc
+import filterbanks
 
 def read_wavfile(path):
     """
@@ -200,26 +201,30 @@ def compute_formants(audiofile):
     return formants
 
 def compute_mfcc(audiofile):
+    #1.
     current_signal, sampling_rate = read_wavfile(audiofile)
     A= [1]
     B= [1,-0.97]
     emphasized_signal = signal.lfilter(B,A,current_signal)
     frames= split(emphasized_signal,sampling_rate, 50, 25)
-    windowed_frames = []
+    Ndft = 512
+    mfccs = []
     for frame in frames : 
-        window= signal.hamming(len(frame))
-        windowed_frames.append(window*frame)
-    ndft=512
-    power_spectrum= pow(abs(fft.fft(windowed_frames)),2)/ndft
-    filter_bank_values = filterbanks.filter_banks(power_spectrum, sampling_rate)
-    dcted_filter_bank_values = fft.dct(filter_bank_values, norm=' ortho')
-    dcted_filter_bank_values = dcted_filter_bank_values[0:13]
-    plt.plot(dcted_filter_bank_values)
-    plt.show()
+        window = signal.hamming(len(frame))
+        windowed_frames = window*frame
+        w, h = signal.freqz(windowed_frames, worN=257)
+        power_spectrum= pow(abs(h),2)/Ndft
+        filter_bank_values = filterbanks.filter_banks(power_spectrum, sampling_rate)
+        dct = fft.dct(filter_bank_values, norm='ortho')
+        mfccs.append(dct)
+    return mfccs
 
 if __name__ == "__main__":
     #pitch_1 = autocorrelation_pitch_estim("data/slt_a")
     #pitch_2 = cepstrum_pitch_estim("data/slt_a")
     #print(pitch_1)
     #print(pitch_2)
-    compute_formants("data/bdl_a/arctic_a0001.wav")
+    formants = compute_formants("data/rms_a/arctic_a0001.wav")
+    for f in formants:
+        print(f)
+    #compute_mfcc("data/slt_a/arctic_a0001.wav")
