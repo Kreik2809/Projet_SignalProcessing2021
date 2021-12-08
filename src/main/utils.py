@@ -183,6 +183,7 @@ def compute_formants(audiofile):
     B = [1, -0.67]  
     new_frame = []
     lpc_order = int(2 + (sampling_rate/1000))
+    formants = []
     for frame in frames:
         filtered_frame =  signal.lfilter(B, A, frame)
         window = signal.hamming(len(filtered_frame))
@@ -195,7 +196,8 @@ def compute_formants(audiofile):
                 angle = np.arctan2(np.imag(r), np.real(r))
                 values.append(angle * ((sampling_rate/10)/2*np.pi))
         values.sort()
-        print(values)
+        formants.append(values)
+    return formants
 
 def compute_mfcc(audiofile):
     current_signal, sampling_rate = read_wavfile(audiofile)
@@ -220,4 +222,4 @@ if __name__ == "__main__":
     #pitch_2 = cepstrum_pitch_estim("data/slt_a")
     #print(pitch_1)
     #print(pitch_2)
-    compute_formants("data/slt_a/arctic_a0001.wav")
+    compute_formants("data/bdl_a/arctic_a0001.wav")
