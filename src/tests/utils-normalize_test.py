@@ -9,11 +9,10 @@ import numpy as np
 
 class Normalize_test(unittest.TestCase):
     
-
     """
         Unit test to test if the max value of the normalized array is <= 1
     """
-    def test_max(self):
+    def test_01(self):
         array = np.array([random.uniform(-10, 10) for p in range(10)])
         n_array = utils.normalize(array)
         maximum = max(n_array)
@@ -22,7 +21,7 @@ class Normalize_test(unittest.TestCase):
     """
         Unit test to test if the min value of the normalized array is >= -1
     """
-    def test_min(self):
+    def test_02(self):
         array = np.array([random.uniform(-10, 10) for p in range(10)])
         n_array = utils.normalize(array)
         minimum = min(n_array)
@@ -30,6 +29,3 @@ class Normalize_test(unittest.TestCase):
 
 if __name__ == "__main__":
    unittest.main() 
-
-
-
