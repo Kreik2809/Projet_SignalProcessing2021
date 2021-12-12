@@ -190,7 +190,7 @@ def compute_formants(audiofile):
         filtered_frame =  signal.lfilter(B, A, frame)
         window = signal.hamming(len(filtered_frame))
         windowed_frame = filtered_frame * window
-        lpc = scilpc.lpc_ref(windowed_frame, 10)
+        lpc = scilpc.lpc_ref(windowed_frame, lpc_order)
         roots = np.roots(lpc)
         conjugate = []
         for r in roots:
@@ -227,13 +227,13 @@ if __name__ == "__main__":
     #pitch_2 = cepstrum_pitch_estim("data/slt_a")
     #print(pitch_1)
     #print(pitch_2)
-    f_bdl = compute_formants("data/bdl_a/arctic_a0014.wav")
+    f_bdl = compute_formants("data/bdl_a/arctic_a0015.wav")
     f1_bdl = []
     print("Homme : ")
     for elem in f_bdl:
         print(elem)
         f1_bdl.append(elem[0])
-    f_slt = compute_formants("data/slt_a/arctic_a0014.wav")
+    f_slt = compute_formants("data/slt_a/arctic_a0015.wav")
     f1_slt = []
     print("Femme = ")
     for elem in f_slt:
