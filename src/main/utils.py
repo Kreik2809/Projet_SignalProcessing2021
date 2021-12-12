@@ -178,29 +178,31 @@ def cepstrum_pitch_estim(path):
 def compute_formants(audiofile):
 	#1.
     current_signal, sampling_rate = read_wavfile(audiofile) 
-    current_signal = normalize(current_signal)
-    frames = split(current_signal, sampling_rate, 25, 25) 
-    voiced, unvoiced = get_voiced(frames, 0)
+    frames = split(normalize(current_signal), sampling_rate, 25, 25) 
     #2.
-    A = [1., 0.]
-    B = [1., -0.67]  
+    A = [1]
+    B = [1, 0.67]  
     lpc_order = int(2 + (sampling_rate/1000))
     formants = []
-    for frame in voiced:
+    time = 0
+    for frame in frames:
         filtered_frame =  signal.lfilter(B, A, frame)
         window = signal.hamming(len(filtered_frame))
         windowed_frame = filtered_frame * window
         lpc = scilpc.lpc_ref(windowed_frame, 10)
         roots = np.roots(lpc)
-        conjugate = []
+        values = []
         for r in roots:
             if (np.imag(r) > 0):
-                conjugate.append(r)
-        angle = np.arctan(np.imag(conjugate),np.real(conjugate)) 
-        values = sorted(angle * (sampling_rate / (2 * np.pi))) 
+                angle = np.arctan2(np.imag(r), np.real(r))
+                values.append(angle * ((sampling_rate/10)/2*np.pi))
         values.sort()
+        values.insert(0, time)
         formants.append(values)
+        time += 0.025
     return formants
+    
+    
 
 def compute_mfcc(audiofile):
     #1.
@@ -222,23 +224,29 @@ def compute_mfcc(audiofile):
         mfccs.append(dct)
     return mfccs
 
+
 if __name__ == "__main__":
     #pitch_1 = autocorrelation_pitch_estim("data/slt_a")
     #pitch_2 = cepstrum_pitch_estim("data/slt_a")
     #print(pitch_1)
     #print(pitch_2)
-    f_bdl = compute_formants("data/bdl_a/arctic_a0001.wav")
-    f1_bdl = []
-    print("Homme : ")
-    for elem in f_bdl:
-        print(elem)
-        f1_bdl.append(elem[0])
-    f_slt = compute_formants("data/slt_a/arctic_a0001.wav")
-    f1_slt = []
-    print("Femme = ")
-    for elem in f_slt:
-        print(elem)
-        f1_slt.append(elem[0])
-
-    print(np.mean(f1_bdl))
-    print(np.mean(f1_slt))
+    formants_bdl = compute_formants("data/bdl_a/arctic_a0001.wav")
+    formants_slt = compute_formants("data/slt_a/arctic_a0001.wav")
+    f1_list = []
+    f2_list = []
+    print("BDL : ")
+    for f in formants_bdl:
+        print(f)
+        f1 = f[1]
+        f1_list.append(f1)
+    print("SLT : ")
+    for f in formants_slt:
+        print(f)
+        f2 = f[1]
+        f2_list.append(f2)
+		
+    print(np.mean(f1_list))
+    print(np.mean(f2_list))
+		
+		
+    #compute_mfcc("data/slt_a/arctic_a0001.wav")
