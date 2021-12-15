@@ -197,9 +197,9 @@ def compute_formants(audiofile):
                 angle = np.arctan2(np.imag(r), np.real(r))
                 values.append(angle * ((sampling_rate/10)/2*np.pi))
         values.sort()
-        values.insert(0, time)
+        #values.insert(0, time)
         formants.append(values)
-        time += 0.025
+        #time += 0.025
     return formants
     
     
@@ -225,28 +225,79 @@ def compute_mfcc(audiofile):
     return mfccs
 
 
+def system_01(path):
+    """
+    path point to a directory where minimum 5 audiofiles are stored
+    """
+    autocorr_pitch = autocorrelation_pitch_estim(path)
+    cepstrum_pitch = cepstrum_pitch_estim(path)
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.chdir("../../")
+    os.chdir(path)
+    files = random.sample(glob.glob("*.wav"), 5)
+    formants_list = []
+    for file in files:
+        formants = compute_formants(file)
+        for f in formants:
+            formants_list.append(f)
+    
+    f1_list = []
+    for i in range(len(formants_list)):
+        if (formants_list[i][0] > 90 and formants_list[i][0] < 1000):
+            f1_list.append(formants_list[i][0])
+
+    if (autocorr_pitch < 150):
+        if (cepstrum_pitch < 170):
+            if (np.mean(f1_list) < 410):
+                print("C'est un homme")
+    
+    if (autocorr_pitch > 170):
+        if(cepstrum_pitch > 217):
+            if(np.mean(f1_list)>370):
+                print("C'est une femme")
+    
+
+    os.chdir("../../")
+    
+
+
 if __name__ == "__main__":
+    """
     #pitch_1 = autocorrelation_pitch_estim("data/slt_a")
     #pitch_2 = cepstrum_pitch_estim("data/slt_a")
     #print(pitch_1)
     #print(pitch_2)
-    formants_bdl = compute_formants("data/bdl_a/arctic_a0001.wav")
-    formants_slt = compute_formants("data/slt_a/arctic_a0001.wav")
-    f1_list = []
-    f2_list = []
-    print("BDL : ")
-    for f in formants_bdl:
-        print(f)
-        f1 = f[1]
-        f1_list.append(f1)
-    print("SLT : ")
-    for f in formants_slt:
-        print(f)
-        f2 = f[1]
-        f2_list.append(f2)
-		
-    print(np.mean(f1_list))
-    print(np.mean(f2_list))
-		
-		
-    #compute_mfcc("data/slt_a/arctic_a0001.wav")
+    path1 = "data/bdl_a"
+    os.chdir(path1)
+    files1 = glob.glob("*.wav")
+    choosen_files1 = random.sample(files1, 15)
+    os.chdir("../../")
+
+    for i in range(15):
+        liste1 = []
+        liste2 = []
+        f_list1 = compute_formants("data/bdl_a/"+choosen_files1[i])
+        f_list2 = compute_formants("data/slt_a/" + choosen_files1[i])
+        for j in range(len(f_list1)):
+            #print("-------------------------------------------------------")
+            #print("====BDL====")
+            if(f_list1[j][1] > 800 and f_list1[j][1] < 2000):
+                liste1.append(f_list1[j][1])
+        for j in range(len(f_list2)):
+            if(f_list2[j][1] > 800 and f_list2[j][1] < 2000):
+                liste2.append(f_list2[j][1])
+            #print("====SLT=====")
+            #print(f_list2[j])
+            
+        plt.subplot(211)
+        plt.hist(liste1, 20)
+        plt.axvline(np.mean(liste1), color = 'r')
+        plt.grid(True)
+        plt.subplot(212)
+        plt.hist(liste2, 20)
+        plt.axvline(np.mean(liste2), color = 'r')
+        plt.grid(True)
+        plt.show()
+        """
+    for i in range(10):
+        system_01("data/rms_a")
