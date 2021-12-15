@@ -229,13 +229,20 @@ def analyse(path):
             formants_list.append(f)
     
     f1_list = []
+    f2_list = []
     for i in range(len(formants_list)):
         if (formants_list[i][0] > 90 and formants_list[i][0] < 1000):
             f1_list.append(formants_list[i][0])
-    return autocorr_pitch, cepstrum_pitch, f1_list
+        if (formants_list[i][1] > 1000 and formants_list[i][1] < 2500):
+            f2_list.append(formants_list[i][1])
+    return autocorr_pitch, cepstrum_pitch, f1_list, f2_list
 
 def system_01(path):
-    autocorr_pitch, cepstrum_pitch, f1_list = analyse(path)
+    """
+    from 70 to 90 percent succes classification for bdl, rms and slt
+    from 0 to 10 for cms
+    """
+    autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse(path)
     f1 = np.mean(f1_list)
     print("Estimation du pitch avec la méthode autocorr : " + str(autocorr_pitch))
     print("Estimation du pitch avec la méthode cepstrum : " + str(cepstrum_pitch))
@@ -244,20 +251,86 @@ def system_01(path):
         if (cepstrum_pitch < 170):
             if (np.mean(f1) < 410):
                 print("C'est un homme")
+                return "man"
     
     if (autocorr_pitch > 170):
         if(cepstrum_pitch > 210):
-            if(np.mean(f1)>370):
+            if(np.mean(f1) > 370):
                 print("C'est une femme")
+                return "woman"
     os.chdir("../../")
 
 def system_02(path):
-    autocorr_pitch, cepstrum_pitch, f1_list = analyse(path)
+    """
+    Utilise des poids associés à chaque règle définie et déterminer ensuite la classification 
+    à partir de ces poids.
+    Idée : améliorer les performances pour CMS
+    40/40 bonne classifications
+    """
+    autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse(path)
     f1 = np.mean(f1_list)
     print("Estimation du pitch avec la méthode autocorr : " + str(autocorr_pitch))
     print("Estimation du pitch avec la méthode cepstrum : " + str(cepstrum_pitch))
     print("Estimation du formant 1 : " + str(f1))
+    autocorr_pitch_weight = 0.4
+    cepstrum_pitch_weight = 0.4
+    f1_weight = 0.2
 
+    man_prob = 0
+    woman_prob = 0
+
+    if (autocorr_pitch < 150):
+        man_prob += autocorr_pitch_weight
+    if (cepstrum_pitch < 170):
+        man_prob += cepstrum_pitch_weight
+    if (f1 < 410):
+        man_prob += f1_weight
+    
+    if (autocorr_pitch > 170):
+        woman_prob += autocorr_pitch_weight
+    if (cepstrum_pitch > 210):
+        woman_prob += cepstrum_pitch_weight
+    if (f1 > 370):
+        woman_prob += f1_weight
+
+    if(man_prob > 0.5 and woman_prob > 0.5):
+        print("Indécis")
+    elif(man_prob > 0.5 and woman_prob < 0.5):
+        print("C'est un homme")
+        print(man_prob)
+        return "man"
+    elif(man_prob < 0.5 and woman_prob > 0.5):
+        print("C'est une femme")
+        print(woman_prob)
+        return "woman"
+    else:
+        print("Else")
 if __name__ == "__main__":
+    n = 40
+    global_good_classifications = 0
+    cms_good_classification = 0
+    slt_good_classification = 0
+    bdl_good_classification = 0
+    rms_good_classification = 0
     for i in range(10):
-        system_01("data/rms_b")
+        if (system_01("data/cms_b") == "woman"):
+            global_good_classifications += 1
+            cms_good_classification += 1
+    for i in range(10):
+        if (system_01("data/slt_a") == "woman"):
+            global_good_classifications += 1
+            slt_good_classification += 1
+    for i in range(10):
+        if (system_01("data/bdl_a") == "man"):
+            global_good_classifications += 1
+            bdl_good_classification += 1
+    for i in range(10): 
+        if (system_01("data/rms_b") == "man"):
+            global_good_classifications += 1
+            rms_good_classification += 1
+    print("====Résultat====")
+    print("Précision globale : " + str(global_good_classifications/40))
+    print("Précision cms : " + str(cms_good_classification/10))
+    print("Précision slt : " + str(slt_good_classification/10))
+    print("Précision bdl : " + str(bdl_good_classification/10))
+    print("Précision rms : " + str(rms_good_classification/10))
