@@ -75,21 +75,14 @@ def get_voiced(frames, treshold):
     return voiced_segments, unvoiced_segments
 
 
-def autocorrelation_pitch_estim(path):
+def autocorrelation_pitch_estim(files):
     """
     Compute an estimation of the pitch of a speaker using the autocorrelation method.
-        @path of the directory where utterances (minimum 5) are stored
+        @list of files where utterances (minimum 5) are stored
     """
     #1.
-    #On se replace à la racine du projet
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    os.chdir("../../")
-    #On se place dans le dossier où les échantillons de voix sont stockés.
-    os.chdir(path)
-    files = glob.glob("*.wav")
-    choosed_files = random.sample(files, 5)
     f0_list = []
-    for file in choosed_files:
+    for file in files:
         current_signal, sampling_rate = read_wavfile(file)
         #2.
         current_signal = normalize(current_signal)
@@ -120,21 +113,15 @@ def autocorrelation_pitch_estim(path):
     return f0
 
 
-def cepstrum_pitch_estim(path): 
+def cepstrum_pitch_estim(files): 
     """
     Compute an estimation of the pitch of a speaker using the cepstrum method.
-        @path of the directory where utterances (minimum 5) are stored
+        @list of files where utterances (minimum 5) are stored
     """
     #On prend des samples randoms pour les deux personnes
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    os.chdir("../../")
-    os.chdir(path)
-    files = glob.glob("*.wav")
-    choosed_files = random.sample(files, 5)
-
     f0_list = []
     #On normalise les signaux et on les affiche (point 2)
-    for file in choosed_files:
+    for file in files:
         current_signal, sampling_rate = read_wavfile(file)
         current_signal = normalize(current_signal)
 
@@ -224,17 +211,17 @@ def compute_mfcc(audiofile):
         mfccs.append(dct)
     return mfccs
 
-
-def system_01(path):
+def analyse(path):
     """
     path point to a directory where minimum 5 audiofiles are stored
     """
-    autocorr_pitch = autocorrelation_pitch_estim(path)
-    cepstrum_pitch = cepstrum_pitch_estim(path)
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     os.chdir("../../")
     os.chdir(path)
     files = random.sample(glob.glob("*.wav"), 5)
+    print(files)
+    autocorr_pitch = autocorrelation_pitch_estim(files)
+    cepstrum_pitch = cepstrum_pitch_estim(files)
     formants_list = []
     for file in files:
         formants = compute_formants(file)
@@ -245,59 +232,32 @@ def system_01(path):
     for i in range(len(formants_list)):
         if (formants_list[i][0] > 90 and formants_list[i][0] < 1000):
             f1_list.append(formants_list[i][0])
+    return autocorr_pitch, cepstrum_pitch, f1_list
 
+def system_01(path):
+    autocorr_pitch, cepstrum_pitch, f1_list = analyse(path)
+    f1 = np.mean(f1_list)
+    print("Estimation du pitch avec la méthode autocorr : " + str(autocorr_pitch))
+    print("Estimation du pitch avec la méthode cepstrum : " + str(cepstrum_pitch))
+    print("Estimation du formant 1 : " + str(f1))
     if (autocorr_pitch < 150):
         if (cepstrum_pitch < 170):
-            if (np.mean(f1_list) < 410):
+            if (np.mean(f1) < 410):
                 print("C'est un homme")
     
     if (autocorr_pitch > 170):
-        if(cepstrum_pitch > 217):
-            if(np.mean(f1_list)>370):
+        if(cepstrum_pitch > 210):
+            if(np.mean(f1)>370):
                 print("C'est une femme")
-    
-
     os.chdir("../../")
-    
 
+def system_02(path):
+    autocorr_pitch, cepstrum_pitch, f1_list = analyse(path)
+    f1 = np.mean(f1_list)
+    print("Estimation du pitch avec la méthode autocorr : " + str(autocorr_pitch))
+    print("Estimation du pitch avec la méthode cepstrum : " + str(cepstrum_pitch))
+    print("Estimation du formant 1 : " + str(f1))
 
 if __name__ == "__main__":
-    """
-    #pitch_1 = autocorrelation_pitch_estim("data/slt_a")
-    #pitch_2 = cepstrum_pitch_estim("data/slt_a")
-    #print(pitch_1)
-    #print(pitch_2)
-    path1 = "data/bdl_a"
-    os.chdir(path1)
-    files1 = glob.glob("*.wav")
-    choosen_files1 = random.sample(files1, 15)
-    os.chdir("../../")
-
-    for i in range(15):
-        liste1 = []
-        liste2 = []
-        f_list1 = compute_formants("data/bdl_a/"+choosen_files1[i])
-        f_list2 = compute_formants("data/slt_a/" + choosen_files1[i])
-        for j in range(len(f_list1)):
-            #print("-------------------------------------------------------")
-            #print("====BDL====")
-            if(f_list1[j][1] > 800 and f_list1[j][1] < 2000):
-                liste1.append(f_list1[j][1])
-        for j in range(len(f_list2)):
-            if(f_list2[j][1] > 800 and f_list2[j][1] < 2000):
-                liste2.append(f_list2[j][1])
-            #print("====SLT=====")
-            #print(f_list2[j])
-            
-        plt.subplot(211)
-        plt.hist(liste1, 20)
-        plt.axvline(np.mean(liste1), color = 'r')
-        plt.grid(True)
-        plt.subplot(212)
-        plt.hist(liste2, 20)
-        plt.axvline(np.mean(liste2), color = 'r')
-        plt.grid(True)
-        plt.show()
-        """
     for i in range(10):
-        system_01("data/rms_a")
+        system_01("data/rms_b")
