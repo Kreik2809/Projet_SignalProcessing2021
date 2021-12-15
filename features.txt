@@ -1,7 +1,17 @@
-pitch = male : [60, 180]
-	female = [160, 300]
+Règles de décisions déterminée en analysant les différentes features
+Elles ont été affinées par la suite pour améliorer les résultats
 
-formant = male : 
-	   female :
+Autocorrelation :
+    -Homme if pitch < 145 then bdl
+    -Femme if pitch > 170 then slt
 
-mfcc = 
+Cepstrum : 
+    -Homme if pitch < 166 then bdl
+    -Femme if pitch > 217 then slt
+
+Formants :
+    -Homme if F1 < 400 then bdl
+    -Femme if F1 > 380 then slt
+
+    -Homme if F2 < 1500 then bdl
+    -Femme if F2 > 1400 then slt

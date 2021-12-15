@@ -241,6 +241,12 @@ def system_01(path):
     """
     from 70 to 90 percent succes classification for bdl, rms and slt
     from 0 to 10 for cms
+    ====Résultat====
+    Précision globale : 0.7
+    Précision cms : 0.0
+    Précision slt : 0.9
+    Précision bdl : 0.9
+    Précision rms : 1.0
     """
     autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse(path)
     f1 = np.mean(f1_list)
@@ -258,7 +264,6 @@ def system_01(path):
             if(np.mean(f1) > 370):
                 print("C'est une femme")
                 return "woman"
-    os.chdir("../../")
 
 def system_02(path):
     """
@@ -266,6 +271,12 @@ def system_02(path):
     à partir de ces poids.
     Idée : améliorer les performances pour CMS
     40/40 bonne classifications
+    ====Résultat====
+    Précision globale : 1.0
+    Précision cms : 1.0
+    Précision slt : 1.0
+    Précision bdl : 1.0
+    Précision rms : 1.0
     """
     autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse(path)
     f1 = np.mean(f1_list)
@@ -305,6 +316,21 @@ def system_02(path):
         return "woman"
     else:
         print("Else")
+
+
+def system_03(path):
+    autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse(path)
+    f1=np.mean(f1_list)
+    f2=np.mean(f2_list)
+    if(autocorr_pitch < 160):
+        if(np.mean(f1)<410):
+            if(np.mean(f2)<1500):
+                print("C'est un homme")
+                return "man"
+    else :
+        print("C'est une femme")
+        return "woman"
+
 if __name__ == "__main__":
     n = 40
     global_good_classifications = 0
@@ -313,19 +339,19 @@ if __name__ == "__main__":
     bdl_good_classification = 0
     rms_good_classification = 0
     for i in range(10):
-        if (system_01("data/cms_b") == "woman"):
+        if (system_03("data/cms_b") == "woman"):
             global_good_classifications += 1
             cms_good_classification += 1
     for i in range(10):
-        if (system_01("data/slt_a") == "woman"):
+        if (system_03("data/slt_a") == "woman"):
             global_good_classifications += 1
             slt_good_classification += 1
     for i in range(10):
-        if (system_01("data/bdl_a") == "man"):
+        if (system_03("data/bdl_a") == "man"):
             global_good_classifications += 1
             bdl_good_classification += 1
     for i in range(10): 
-        if (system_01("data/rms_b") == "man"):
+        if (system_03("data/rms_b") == "man"):
             global_good_classifications += 1
             rms_good_classification += 1
     print("====Résultat====")
