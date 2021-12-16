@@ -1,0 +1,15 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\babel@toc {french}{}
+\contentsline {chapter}{1. Exécution du code/ Structure}{1}{section*.2}%
+\contentsline {section}{1.1 Librairies utilisées}{1}{section*.3}%
+\contentsline {section}{1.2 Structure du code source}{1}{section*.4}%
+\contentsline {chapter}{1. Caractéristiques étudiées}{1}{section*.5}%
+\contentsline {section}{1.1 Energie du signal}{1}{section*.6}%
+\contentsline {section}{1.2 Fréquence fondamentale}{1}{section*.7}%
+\contentsline {section}{1.3 Formants}{1}{section*.8}%
+\contentsline {section}{1.4 MFCCs}{1}{section*.9}%
+\contentsline {chapter}{3. Systèmes basés sur des règles}{1}{section*.10}%
+\contentsline {section}{3.1 Système 01}{1}{section*.11}%
+\contentsline {section}{3.2 Système 02}{1}{section*.12}%
+\contentsline {section}{3.3 Systèmes 03}{1}{section*.13}%
+\contentsline {chapter}{4. Machine learning}{1}{section*.14}%

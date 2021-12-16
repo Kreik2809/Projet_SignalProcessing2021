@@ -1,0 +1,150 @@
+% % % % % % %
+%  Packages %
+% % % % % % %
+
+%---Base packages
+\documentclass[a4paper,12pt]{report}	% document type (article, report, book)
+\usepackage[utf8]{inputenc}			% encoding
+\usepackage[T1]{fontenc}			% accent
+\usepackage{lmodern}				% latin font
+\usepackage{appendix}				% to be able to use appendices
+\usepackage{float,graphicx}	
+\usepackage{algorithm}
+\usepackage{algorithmic}	
+
+%---Language(s)
+\usepackage[english,frenchb]{babel}	% last language = typography by default
+\addto\captionsfrench{				% to change the french names of...
+	\renewcommand{\appendixpagename}{Annexes}	% (default Appendices)
+	\renewcommand{\appendixtocname}{Annexes}	% (default Appendices)
+	\renewcommand{\tablename}{\textsc{Tableau}}	% (default \textsc{Table})
+}
+
+%---Page layout
+%------> margins
+	% 1st option -> geometry package
+		%\usepackage[a4paper]{geometry}		% default parameters for A4
+		%\usepackage[top=2in, bottom=1.5in, left=1in, right=1in]{geometry}
+	% 2nd option -> a4wide package
+		\usepackage{a4wide}		% A4 with smaller margins (the one I've chosen)
+	% 3rd option -> fullpage package
+		%\usepackage{fullpage}
+%------> chapter style
+	% 1st option -> fncychap package
+		%\usepackage[style]{fncychap}		% style = Lenny, Bjornstrup, Sonny, Conny
+	% 2nd option -> customized styles
+		%
+%------> cover page (UMONS template)
+	\usepackage[fs]{umons-coverpage}		% NEED "umons-coverpage.sty" file
+	\umonsAuthor{Réalisé par Louis \textsc{Dascotte} \\ \& Nicolas \textsc{Delplanque} \\ \& Nicolas \textsc{Sournac} } 
+	\umonsTitle{Traitement du signal : Projet}
+	\umonsSubtitle{Speaker classification}
+	\umonsDocumentType{I-ISIA-030}
+	\umonsDate{3e Bachelier en Sciences Informatiques\\ Année 2021-2022}
+
+%---Numbering
+\setcounter{secnumdepth}{2}			% numerotation depth (1=sec and all above)
+\setcounter{tocdepth}{2}			% table of contents depth (1=sec and above)
+
+%---Mathematics
+\usepackage{amsmath}				% base package for mathematics
+\usepackage{amsfonts}				% base package for mathematics
+\usepackage{amssymb}				% base package for mathematics
+%\usepackage{amsthm}				% theorem and proof environments
+%\usepackage{cases}					% numcases environment
+%\usepackage{mathrsfs}				% \mathscf command ('L' of Laplace-Transform,...)
+
+%---Floating objects (images, tables,...)
+\usepackage{float}					% better management of floating objects
+\usepackage{array}					% better management of tables
+\usepackage{graphicx}				% to include external images
+\graphicspath{{Images/}}			% to put images in an 'Images' folder 
+%\usepackage{caption}				% /!\ has priority on "memoir" class
+%\usepackage{subcaption}			% subfigure and subtable environments
+%\usepackage{subfig}				% \subfloat command
+%\usepackage{wrapfig}				% wrapfigure environment
+%\usepackage[update]{epstopdf}		% to use '.eps' files with PDFLaTeX
+
+\setlength{\extrarowheight}{.5ex}
+
+
+%---Units from International System
+\usepackage{siunitx}				% \SI{}{} command (units with good typography)
+\DeclareSIUnit\baud{baud}			% definition of the "baud" unit
+\DeclareSIUnit\bit{bit}				% definition of the "bit" unit
+
+%---Drawing
+%\usepackage{tikz}					% useful package for drawing
+%\usepackage[european]{circuitikz} 	% to draw electrical circuits
+
+%---Bibliography
+\usepackage{url}					% to encore url
+\usepackage[style=numeric-comp,backend=bibtex]{biblatex}
+\usepackage{csquotes}				% inverted commas in references
+%\bibliography{bibli}				% your .bib file
+
+%---"hyperref" package				% /!\ it must be the last package
+\usepackage[hidelinks]{hyperref}	% clickable links (table of contents,...)
+
+
+% % % % % % %
+% Document	%
+% % % % % % %
+
+\begin{document}
+
+\umonsCoverPage		% produce the cover page with UMONS and your Faculty logo
+	
+\pagenumbering{roman}	% if you don't use the class "book"
+
+\begin{abstract}
+Ce rapport contient l'ensemble des résultats obtenus, leurs interprétations ainsi les explications du fonctionnement de notre implémentation du projet de traitement du signal. Ce projet consiste en la réalisation d'une solution visant à classifier des personnes en fonction de leur genre à partir d'enregistrement de leur voix.
+\end{abstract}
+
+\clearpage		
+\tableofcontents
+
+\clearpage		
+\pagenumbering{arabic}
+
+{\section*{1. Exécution du code}}
+\addcontentsline{toc}{chapter}{1. Exécution du code/ Structure}
+{\subsection*{1.1 Librairies utilisées}}
+\addcontentsline{toc}{section}{1.1 Librairies utilisées}
+{\subsection*{1.2 Structure du code source}}
+\addcontentsline{toc}{section}{1.2 Structure du code source}
+
+{\section*{2. Caractéristiques étudiées}}
+	\addcontentsline{toc}{chapter}{1. Caractéristiques étudiées}
+TODO : pour chaque caractéristiques, résumé la méthode d'obtention mais surtout les résultats en fonction de bdl et slt et leurs interprétations.
+{\subsection*{2.1 Energie du signal}}
+\addcontentsline{toc}{section}{1.1 Energie du signal}
+
+{\subsection*{2.2 Fréquence fondamentale}}
+\addcontentsline{toc}{section}{1.2 Fréquence fondamentale}
+Attention il faut faire la différence entre les deux méthodes d'estimations
+
+{\subsection*{2.3 Formants}}
+\addcontentsline{toc}{section}{1.3 Formants}
+
+{\subsection*{2.4 MFCCs}}
+\addcontentsline{toc}{section}{1.4 MFCCs}
+	
+{\section*{3. Systèmes basés sur des règles}}
+	\addcontentsline{toc}{chapter}{3. Systèmes basés sur des règles}
+
+{\subsection*{3.1 Système 01}}
+\addcontentsline{toc}{section}{3.1 Système 01}
+
+{\subsection*{3.2 Systèmes 02}}
+\addcontentsline{toc}{section}{3.2 Système 02}
+
+{\subsection*{3.3 Systèmes 03}}
+\addcontentsline{toc}{section}{3.3 Systèmes 03}
+
+{\section*{4. Machine learning}}
+\addcontentsline{toc}{chapter}{4. Machine learning}
+
+\end{document}
+
+
