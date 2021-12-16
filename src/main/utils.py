@@ -79,6 +79,7 @@ def autocorrelation_pitch_estim(files):
     """
     Compute an estimation of the pitch of a speaker using the autocorrelation method.
         @list of files where utterances (minimum 5) are stored
+    Calculate pitch for each frames and then return mean of all pitches
     """
     #1.
     f0_list = []
@@ -117,6 +118,7 @@ def cepstrum_pitch_estim(files):
     """
     Compute an estimation of the pitch of a speaker using the cepstrum method.
         @list of files where utterances (minimum 5) are stored
+    Calculate pitch for each frames and then return mean of all pitches
     """
     #On prend des samples randoms pour les deux personnes
     f0_list = []
@@ -129,8 +131,6 @@ def cepstrum_pitch_estim(files):
         frames = split(current_signal, sampling_rate, 50, 25)
 
         voiced_segment, unvoiced_segment = get_voiced(frames, 5)
-        maximum_index = 0
-        maximum_index_windowed = 0
         for segment in voiced_segment:
             #On obtient le ceptrum des signaux (point 6)
             w, h = signal.freqz(segment)
@@ -163,6 +163,9 @@ def cepstrum_pitch_estim(files):
         
 
 def compute_formants(audiofile):
+    """
+    Compute all frame formants of an audiofiles and return it as a 2 dimensional array
+    """
 	#1.
     current_signal, sampling_rate = read_wavfile(audiofile) 
     frames = split(normalize(current_signal), sampling_rate, 25, 25) 
@@ -213,7 +216,9 @@ def compute_mfcc(audiofile):
 
 def analyse(path):
     """
-    path point to a directory where minimum 5 audiofiles are stored
+    This function is called in each rule-based system in order to compute easily all the features of signals.
+    Because of the cepstrum and autocorrelation pitch estimation requirements, path must point to
+    a directory where minimum 5 audiofiles of a speaker are stored.
     """
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     os.chdir("../../")
@@ -233,20 +238,20 @@ def analyse(path):
     for i in range(len(formants_list)):
         if (formants_list[i][0] > 90 and formants_list[i][0] < 1000):
             f1_list.append(formants_list[i][0])
-        if (formants_list[i][1] > 1000 and formants_list[i][1] < 2500):
+        if (formants_list[i][1] > 600 and formants_list[i][1] < 3200):
             f2_list.append(formants_list[i][1])
     return autocorr_pitch, cepstrum_pitch, f1_list, f2_list
 
 def system_01(path):
     """
-    from 70 to 90 percent succes classification for bdl, rms and slt
-    from 0 to 10 for cms
-    ====Résultat====
-    Précision globale : 0.7
-    Précision cms : 0.0
-    Précision slt : 0.9
-    Précision bdl : 0.9
-    Précision rms : 1.0
+    Simple rule-based system that implements observed rules with if-else statements.
+    It uses autocorrelation pitch estimation, cepstrum pitch estimation and formant 1.
+    ====Results====
+    Accuracy global : 0.7
+    Accuracy cms : 0.0
+    Accuracy slt : 0.9
+    Accuracy bdl : 0.9
+    Accuracy rms : 1.0
     """
     autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse(path)
     f1 = np.mean(f1_list)
@@ -267,16 +272,16 @@ def system_01(path):
 
 def system_02(path):
     """
-    Utilise des poids associés à chaque règle définie et déterminer ensuite la classification 
-    à partir de ces poids.
-    Idée : améliorer les performances pour CMS
-    40/40 bonne classifications
-    ====Résultat====
-    Précision globale : 1.0
-    Précision cms : 1.0
-    Précision slt : 1.0
-    Précision bdl : 1.0
-    Précision rms : 1.0
+    Rule-based system which aims to improve system_01 perf. Use weight to determine the output.
+    It uses autocorrelation pich estimation, cepstrum pitch estimation and formant 1.
+    The two pitch have each 0.4 weight in the process of decision where formant 1 only 0.2
+    If man probability or woman probability has more thant 0.5, then the system can determine an output.
+    ====Results====
+    Accuracy global : 1.0
+    Accuracy cms : 1.0
+    Accuracy slt : 1.0
+    Accuracy bdl : 1.0
+    Accuracy rms : 1.0
     """
     autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse(path)
     f1 = np.mean(f1_list)
@@ -305,7 +310,7 @@ def system_02(path):
         woman_prob += f1_weight
 
     if(man_prob > 0.5 and woman_prob > 0.5):
-        print("Indécis")
+        print("unknown")
     elif(man_prob > 0.5 and woman_prob < 0.5):
         print("C'est un homme")
         print(man_prob)
@@ -314,9 +319,6 @@ def system_02(path):
         print("C'est une femme")
         print(woman_prob)
         return "woman"
-    else:
-        print("Else")
-
 
 def system_03(path):
     autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse(path)
