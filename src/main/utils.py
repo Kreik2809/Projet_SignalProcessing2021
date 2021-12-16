@@ -274,7 +274,7 @@ def system_02(path):
     """
     Rule-based system which aims to improve system_01 perf. Use weight to determine the output.
     It uses autocorrelation pich estimation, cepstrum pitch estimation and formant 1.
-    The two pitch have each 0.4 weight in the process of decision where formant 1 only 0.2
+    The two pitch have each 0.4 weight in the process of decision where formant 1 has only 0.2
     If man probability or woman probability has more thant 0.5, then the system can determine an output.
     ====Results====
     Accuracy global : 1.0
