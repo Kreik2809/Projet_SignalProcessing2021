@@ -220,10 +220,6 @@ def analyse(path):
     Because of the cepstrum and autocorrelation pitch estimation requirements, path must point to
     a directory where minimum 5 audiofiles of a speaker are stored.
     """
-    
-    os.chdir(os.path.dirname(os.path.realpath(__file__)))
-    os.chdir("../../")
-    print(os.getcwd())
     os.chdir(path)
     files = random.sample(glob.glob("*.wav"), 5)
     print(files)
@@ -242,6 +238,7 @@ def analyse(path):
             f1_list.append(formants_list[i][0])
         if (formants_list[i][1] > 600 and formants_list[i][1] < 3200):
             f2_list.append(formants_list[i][1])
+    os.chdir("../../")
     return autocorr_pitch, cepstrum_pitch, f1_list, f2_list
 
 def system_01(path):
