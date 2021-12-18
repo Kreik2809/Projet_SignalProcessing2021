@@ -3,7 +3,7 @@ import numpy as np
 import numpy.lib.stride_tricks as npst
 import matplotlib.pyplot as plt
 from scipy import signal, fft
-import glob, os, random
+import glob, os, random, sys
 
 import scipy
 import xcorr
@@ -220,8 +220,10 @@ def analyse(path):
     Because of the cepstrum and autocorrelation pitch estimation requirements, path must point to
     a directory where minimum 5 audiofiles of a speaker are stored.
     """
-    os.chdir(os.path.dirname(__file__))
+    
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
     os.chdir("../../")
+    print(os.getcwd())
     os.chdir(path)
     files = random.sample(glob.glob("*.wav"), 5)
     print(files)
