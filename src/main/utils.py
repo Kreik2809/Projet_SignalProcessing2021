@@ -324,14 +324,23 @@ def system_03(path):
     autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse(path)
     f1=np.mean(f1_list)
     f2=np.mean(f2_list)
-    if(autocorr_pitch < 160):
+    if(autocorr_pitch < 150):
         if(np.mean(f1)<410):
-            if(np.mean(f2)<1500):
+            if(np.mean(f2)<2000):
                 print("C'est un homme")
                 return "man"
-    else :
-        print("C'est une femme")
-        return "woman"
+                    
+                
+    if(autocorr_pitch > 170):
+        print("ok1")
+        print(np.mean(f1))
+        if(np.mean(f1)>270):
+            print("ok2")
+            if(np.mean(f2)>1800):
+                print("C'est une femme")
+                return "woman"
+    else:
+        print("Else")
 
 if __name__ == "__main__":
     n = 40
