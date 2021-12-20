@@ -87,6 +87,10 @@
 \usepackage[hidelinks]{hyperref}	% clickable links (table of contents,...)
 
 
+\newcommand*{\addheight}[2][.5ex]{%
+	\raisebox{0pt}[\dimexpr\height+(#1)\relax]{#2}%
+}
+
 % % % % % % %
 % Document	%
 % % % % % % %
@@ -116,7 +120,7 @@ Ce rapport contient l'ensemble des résultats obtenus, leurs interprétations ai
 
 {\section*{2. Caractéristiques étudiées}}
 	\addcontentsline{toc}{chapter}{2. Caractéristiques étudiées}
-Pour la réalisation du projet, nous avons été amenés à étudier différentes caractéristiques des signaux de parole en vue de les utiliser afin de pouvoir classifier les différents speakers. Pour chacune de ces caractéristiques, nous avons donc implémenté un algorithme qui permet de la calculer et nous avons ensuite analysé et interprété les résultats afin d'en déduire des règles sur lesquelles la classification allait se baser.
+Pour la réalisation du projet, nous avons été amenés à étudier différentes caractéristiques des signaux de parole en vue de les utiliser afin de pouvoir classifier les différents speakers. Pour chacune de ces caractéristiques, nous avons donc implémenté un algorithme qui permet de la calculer et nous avons ensuite analysé et interprété ses résultats afin d'en déduire les règles sur lesquelles la classification se base.
 
 {\subsection*{2.1 Energie du signal}}
 \addcontentsline{toc}{section}{2.1 Energie du signal}
@@ -125,34 +129,85 @@ L'énergie du signal est calculée à partir de la fonction compute\_energy() qu
 \addcontentsline{toc}{section}{2.2 Fréquence fondamentale}
 Le pitch ou la fréquence fondamentale représente la plus basse fréquence qui constitue un signal. Cette valeur doit varier entre 60 Hz pour les voix les plus graves et 550 Hz pour les voix les plus aigües. \\
 Lors du projet, nous avons été amenés à calculer la fréquence fondamentale des speakers en utilisant deux méthodes différentes : La méthode basée sur l'autocorrelation et la méthode basée sur les cepstrums. Pour ce faire, nous avons créé les fonctions autocorrelation\_pitch\_estim() et cepstrum\_pitch\_estim(). \\
-Pour la méthode basée sur l'autocorrelation, l'algorithme doit recevoir en paramètre une liste de minimum 5 fichiers audio. Nous lisons chaque fichier, normalisons son signal, le divisons en frames de 50 ms et récupérons uniquement les frames dont l'énergie est supérieure au seuil que nous avons déterminé graphiquement. Ensuite, pour chacune des frames restantes, nous calculons sa corrélations avec un maxlags qui vaut 200. Grâce à la fonction find\_peaks() fournie par la librairie numpy, nous récupérons facilement l'ensemble des pics du signal corrélé. Il ne nous reste plus qu'à calculer la distance en Hz entre les deux plus hauts pics pour obtenir la fréquence fondamentale de la frame. La fonction autocorrelation\_pitch\_estim() retourne la moyenne de toutes les fréquences fondamentales calculées à partir des frames en retirant les fréquences supérieures à 550 Hz considérées comme erronées. Nous considérons ce résultat étant comme la fréquence fondamentale de la personne à l'origine des fichiers audio. \\
+Pour la méthode basée sur l'autocorrelation, l'algorithme doit recevoir en paramètre une liste de minimum 5 fichiers audio. Nous lisons chaque fichier, normalisons son signal, le divisons en frames de 50 ms et récupérons uniquement les frames dont l'énergie est supérieure au seuil que nous avons déterminé graphiquement. Ensuite, pour chacune des frames restantes, nous calculons sa corrélations avec un maxlags qui vaut 200. Grâce à la fonction find\_peaks() fournie par la librairie numpy, nous récupérons facilement l'ensemble des pics du signal corrélé. Il ne nous reste plus qu'à calculer la distance en Hz entre les deux plus hauts pics pour obtenir la fréquence fondamentale de la frame. La fonction autocorrelation\_pitch\_estim() retourne la moyenne de toutes les fréquences fondamentales calculées à partir des frames en retirant les fréquences supérieures à 550 Hz considérées comme erronées. Nous considérons ce résultat comme étant la fréquence fondamentale de la personne à l'origine des fichiers audio. \\
 Pour la méthode basée sur les cepstrums, le début de l'algorithme est similaire au précédent. Nous lisons également chaque fichiers audio fournis, les normalisons, les divisons en frames de 50 ms et récupérons uniquement les frames dont l'énergie est supérieur au seuil que nous avons déterminé graphiquement. Ensuite, pour chacune des frames restantes, nous calculons dans un premier temps son cepstrum de manière brut et dans un deuxième temps son cepstrum après lui avoir appliqué une fenêtre de hamming. Il suffit ensuite de trouver l'indice du plus haut pics présents dans ces deux cepstrums dans l'interval allant de 60Hz à 550Hz et de le convertir en Hz pour obtenir la fréquence fondamentale de la frame. La fonction cepstrum\_pitch\_estim() retourne la moyenne de toutes les fréquences fondamentales calculées à partir des frames. Nous considérons ce résultat comme étant la fréquence fondamentale de la personne à l'origine des fichiers audio.\\
 \\
-Afin de déterminer des règles de différenciations sur base de la fréquence fondamentale, nous avons exécuté 15 fois les deux algorithmes en donnant des fichiers des deux speakers. Pour BDL nous avons pris la valeur maximum obtenues sur les 15 itérations et l'avons considérées comme borne supérieure et pour SLT nous avons pris la valeur minimum obtenues sur les 15 itérations et l'avons considérées comme borne inférieure. Cela nous a donné les règles suivantes : \\
+Afin de déterminer des règles de différenciations sur base de la fréquence fondamentale, nous avons exécuté 15 fois les deux algorithmes en donnant des fichiers des deux speakers. Pour BDL nous avons pris la valeur maximum obtenues sur les 15 itérations et l'avons considérées comme borne supérieure du pitch et pour SLT nous avons pris la valeur minimum obtenues sur les 15 itérations et l'avons considérées comme borne inférieure du pitch. Cela nous a donné les règles suivantes : \\
 Pour la méthode basée sur l'autocorrelation, si f0 < 145Hz alors c'est BDL et si f0 > 170Hz alors c'est SLT. \\
 Pour la méthode basée sur les ceptrums, si f0 < 166Hz alors c'est BDL et si f0 > 217Hz, alors c'est SLT. 
 
 {\subsection*{2.3 Formants}}
 \addcontentsline{toc}{section}{2.3 Formants}
-Les formants sont les pics observés sur l'enveloppe de la réponse en fréquence. Dans le cadre de ce projet, l'estimation des formants se base sur un algorithme LPC. Pour ce faire, nous avons créé la fonction compute\_formant() qui prend un paramètre un fichier audio. L'algorithme va lire le fichier, le normaliser, et le diviser en frames de 25 ms. Pour chacune des frames, un filtre passe-haut du premier ordre lui est appliqué suivi d'une fenêtre de hamming. Nous calculons ensuite les coefficients LPC et trouvons ensuite les racines associées. Les formants sont directement déduits de ces racines complexes. L'algorithmes retourne donc une liste de formants correspondants aux formants de chacune des frames du fichier audio. 
-TODO expliquer comment on a déterminer les règles de classification (voir figure)
-
+Les formants sont les pics observés sur l'enveloppe de la réponse en fréquence. Dans le cadre de ce projet, l'estimation des formants se base sur un algorithme LPC. Pour ce faire, nous avons créé la fonction compute\_formant() qui prend en paramètre un fichier audio. L'algorithme va lire le fichier, le normaliser, et le diviser en frames de 25 ms. Pour chacune des frames, un filtre passe-haut du premier ordre lui est appliqué suivi d'une fenêtre de hamming. Nous calculons ensuite les coefficients LPC et en déterminons les racines associées. Les formants sont directement déduits de ces racines complexes. L'algorithmes retourne donc une liste de formants correspondants aux formants de chacune des frames du fichier audio. \\
+Afin de déterminer des règles de différenciations sur base des formants 1 et 2 nous avons, étant donné que la valeur de ces formants variaient beaucoup pour un même fichier, calculé les formants de plusieurs fichiers audio pour BDL et SLT. De ces formants nous avons extrait les formants 1 et 2 en suivant ces règles : F1 $\in$ [60Hz, 1000Hz] et F2 $\in$ [600Hz, 3200Hz] et pour chacun d'eux, nous les avons affiché sous la forme d'un histogramme. Grâce aux résultats observés et surtout à la position (en rouge) de la moyenne des histogrammes, nous avons déterminé les règles suivantes : \\
+Si F1 < 400Hz alors c'est BDL et si F1 > 380Hz alors c'est SLT.\\
+Si F2 < 1900Hz alors c'est BDL et si F2 > 1800Hz alors c'est SLT. \\
+Voici les observations sur lesquelles nous avons basé notre raisonnement : \\
+\begin{figure}[H]
+	{\includegraphics[scale=0.35]{figures/F1_distr_a0006.png}}
+	\caption{fichier a0006.wav} 
+\end{figure}
+\begin{figure}[H]
+	\centering
+	{\includegraphics[scale=0.35]{figures/F1_distr_a0392.png}}
+	\caption{fichier a0392.wav} 
+\end{figure}
+\begin{figure}[H]
+	{\includegraphics[scale=0.35]{figures/F2_distr_a347.png}}
+	\caption{fichier a0347.wav} 
+\end{figure}
+\begin{figure}[H]
+	\centering
+	{\includegraphics[scale=0.35]{figures/F2_distr_a494.png}}
+	\caption{fichier a0494.wav} 
+\end{figure}
 {\subsection*{2.4 MFCCs}}
 \addcontentsline{toc}{section}{2.4 MFCCs}
 	
 {\section*{3. Systèmes basés sur des règles}}
 	\addcontentsline{toc}{chapter}{3. Systèmes basés sur des règles}
-	Bien expliquer les différents systèmes + comment on les utilise + comment on a fait pour estimer leur précisions + quelles données on a utiliser pour les tester
+Nous avons élaboré trois systèmes différents pour effectuer la classification homme/femme. Les trois systèmes fonctionnent de la même manière, ils doivent recevoir en paramètre un chemin menant vers un dossier qui contient au minimum 5 fichiers audio contenant des enregistrements de voix d'une même personne. Le système se charge d'appeler les méthodes pour en extraire les différentes caractéristiques et retourne le résultat, c'est à dire s'il détermine que c'est une femme ou un homme. Afin de tester la précision des systèmes, nous les avons exécuté 10 fois en leur donnant des fichiers des speakers BDL (homme), RMS (homme), SLT (femme) et CMS (femme). Nous avons récupérés son nombre de bonnes classifications et en avons calculé son rapport avec le nombre total de classifications. Plus précisément, nous avons calculé la précision métrique de chaque système sur base d'enregistrements de BDL, RMS, SLT et CMS.
 
 {\subsection*{3.1 Système 01}}
 \addcontentsline{toc}{section}{3.1 Système 01}
-
+Le système numéro 1 est implémenté dans la fonction system\_01() et utilise les fréquences fondamentales calculées à partir des deux méthodes décrites ci-dessus ainsi que le formant 1. Nous avons commencé par simplement implémenter les règles définies pour BDL (homme) et SLT (femme) et nous les avons donc extrapolées pour déterminer si il s'agit d'un homme ou d'une femme. Nous avons ensuite affinés les valeurs afin d'améliorer la précision du système. Voici la précision du système : \\
+\begin{center}
+	\begin{tabular}{|c|c|c|c|c|}
+		\hline
+		Globale & BDL & SLT & RMS & CMS \\
+		\hline
+		70\% & 90\% & 90\% & 100\% & 0\% \\
+		\hline
+		\end{tabular}
+\end{center}
+Les résultats du système sont bons pour BDL, SLT et RMS mais nul pour CMS souvent en raison du F1.
 {\subsection*{3.2 Système 02}}
 \addcontentsline{toc}{section}{3.2 Système 02}
+Le système numéro 2 est implémenté dans la fonction system\_02() et utilise les fréquences fondamentales calculées à partir des deux méthodes décrites ci-dessus ainsi que le formant 1. Ce système a pour but d'améliorer les performances du système précédent. Pour ce faire, nous avons imaginé attribuer des poids aux différentes caractéristiques. Lorsqu'une caractéristique rentre dans une classe (homme ou femme), alors la probabilité que les fichiers soient de cette classe augmente du poids attribué à cette caractéristique. A la fin, le système regarde quelle probabilité est supérieur à 50\% pour effectuer son choix. Nous avons attribué des poids de 0.4 pour les deux fréquences fondamentales et 0.2 pour le formant 1. Voici la précision du système : \\
+\begin{center}
+	\begin{tabular}{|c|c|c|c|c|}
+		\hline
+		Globale & BDL & SLT & RMS & CMS \\
+		\hline
+		100\% & 100\% & 100\% & 100\% & 100\% \\
+		\hline
+	\end{tabular}
+\end{center}
+Le système dispose de très bonnes performances pour BDL, SLT, RMS et CMS. Cependant, son choix se fait majoritairement via le calcul de la fréquence fondamentale. Nous nous questionnons donc sur sa précision lorsqu'il sera confronté à des sujets dont la fréquence fondamentale ne se situe pas dans la moyenne définie. Ce système est cependant celui qui dispose de la meilleur précisions pour les sujets étudiés dans le cadre de ce projet.
 
 {\subsection*{3.3 Système 03}}
 \addcontentsline{toc}{section}{3.3 Système 03}
-
+Le système numéro 3 est implémenté dans la fonction system\_03() et utilise les fréquences fondamentales calculées à partir des deux méthodes décrites ci-dessus ainsi que le formant 1 et le formant 2. Le système fonctionne globalement comme le système 1. Il utilise néanmoins le formant 2 en plus et les valeurs utilisées dans les structure conditionnelles ont été affinés. Voici la précision du système : \\
+\begin{center}
+	\begin{tabular}{|c|c|c|c|c|}
+		\hline
+		Globale & BDL & SLT & RMS & CMS \\
+		\hline
+		92.5\% & 80\% & 90\% & 100\% & 100\% \\
+		\hline
+	\end{tabular}
+\end{center}
+Les résultats du système sont bons pour BDL, SLT, RMS et CMS.
 {\section*{4. Machine learning}}
 \addcontentsline{toc}{chapter}{4. Machine learning}
 

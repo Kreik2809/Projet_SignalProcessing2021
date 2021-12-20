@@ -259,13 +259,13 @@ def system_01(path):
     print("Estimation du formant 1 : " + str(f1))
     if (autocorr_pitch < 150):
         if (cepstrum_pitch < 170):
-            if (np.mean(f1) < 410):
+            if (f1 < 410):
                 print("C'est un homme")
                 return "man"
     
     if (autocorr_pitch > 170):
         if(cepstrum_pitch > 210):
-            if(np.mean(f1) > 370):
+            if(f1 > 370):
                 print("C'est une femme")
                 return "woman"
 
@@ -321,22 +321,28 @@ def system_02(path):
         return "woman"
 
 def system_03(path):
+    """
+    Rule-based system which uses Formant 2 features in the process of decision.
+    ====Résultat====
+    Précision globale : 0.925
+    Précision cms : 1.0
+    Précision slt : 0.9
+    Précision bdl : 0.8
+    Précision rms : 1.0
+    """
     autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse(path)
     f1=np.mean(f1_list)
     f2=np.mean(f2_list)
     if(autocorr_pitch < 150):
-        if(np.mean(f1)<410):
-            if(np.mean(f2)<2000):
+        if(f1<410):
+            if(f2<2000):
                 print("C'est un homme")
                 return "man"
                     
                 
     if(autocorr_pitch > 170):
-        print("ok1")
-        print(np.mean(f1))
-        if(np.mean(f1)>270):
-            print("ok2")
-            if(np.mean(f2)>1800):
+        if(f1>270):
+            if(f2>1800):
                 print("C'est une femme")
                 return "woman"
     else:
