@@ -191,7 +191,7 @@ def train_BinaryClassificationModel():
     y_test = test_data.iloc[:, -1]
 
     scaler = StandardScaler() #Normalizes inputs
-    X_train = scaler.fit_transform(X_train)
+    X_train = scaler.fit_transform(X_train.values.tolist())
     X_test = scaler.transform(X_test)
 
     #Hyperparameters
@@ -275,17 +275,17 @@ def useModel(model, scaler, inputs):
         y = model(x)
         y = torch.round(torch.sigmoid(y).squeeze(0)).item()
         if y: 
-            print('H')
+            print('It\'s a Men')
         else: 
-            print('F')
+            print('It\'s a Women')
 
 if __name__ == "__main__":
     #Create CSV
     # creat_TestCSV()
     # creat_TrainingCSV()
 
-    model, scaler = train_BinaryClassificationModel()
-    save_BinaryClassificationModel(model, scaler)
+    # model, scaler = train_BinaryClassificationModel()
+    # save_BinaryClassificationModel(model, scaler)
     model, scaler = load_BinaryClassificationModel("../../data/BinaryClassificationModel.pt", "../../data/BinaryClassificationScaler.pt")
     useModel(model, scaler, [110.074607, 108.019277, 322.401576, 1873.313785]) #H
     useModel(model, scaler, [188.91156, 243.643789, 283.640021, 1937.04209]) #F
