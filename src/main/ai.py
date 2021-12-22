@@ -1,4 +1,4 @@
-import os, random, glob, csv
+import os, random, glob, csv, pickle 
 import utils
 
 import numpy as np
@@ -179,15 +179,10 @@ def binary_acc(y_pred, y_test):
     
     return acc
 
-
-if __name__ == "__main__":
-    #Create CSV
-    creat_TestCSV()
-    creat_TrainingCSV()
-
+def train_BinaryClassificationModel():
     #Read CSV
-    training_data = pd.read_csv("data.csv") #Sexe : Men = 1 | Women = 0
-    test_data = pd.read_csv("data2.csv") #Sexe : Men = 1 | Women = 0
+    training_data = pd.read_csv("../../data/data.csv") #Sexe : Men = 1 | Women = 0
+    test_data = pd.read_csv("../../data/data2.csv") #Sexe : Men = 1 | Women = 0
 
     #We choose input features and label in csv files for the training and the test 
     X_train = training_data.iloc[:, :-1]
@@ -232,7 +227,7 @@ if __name__ == "__main__":
             acc = binary_acc(y_pred, y_batch.unsqueeze(1))
             
             loss.backward()
-            optimizer.step() #Modification of biais and weight
+            optimizer.step() #Modification of the bias and weights
             
             epoch_loss += loss.item()
             epoch_acc += acc.item()
@@ -252,6 +247,47 @@ if __name__ == "__main__":
 
     y_pred_list = [a.squeeze().tolist() for a in y_pred_list]
 
-    confusion_matrix(y_test, y_pred_list)
+    return model, scaler
 
-    print(classification_report(y_test, y_pred_list))
+def save_BinaryClassificationModel(model, scaler):
+    torch.save(model.state_dict(), "../../data/BinaryClassificationModel.pt")
+    fileScaler = open("../../data/BinaryClassificationScaler.pt", 'wb') 
+    pickle.dump(scaler, fileScaler)
+
+
+def load_BinaryClassificationModel(pathModel, pathScaler):
+    model = BinaryClassification()
+    model.load_state_dict(torch.load(pathModel))
+    model.eval()
+    fileScaler = open(pathScaler, 'rb')
+    scaler = pickle.load(fileScaler)
+
+    return model, scaler
+
+def useModel(model, scaler, inputs):
+    inputs = [inputs]
+    x = scaler.transform(inputs)
+
+    x = torch.FloatTensor(x) #Convert to tensor for compatibility with the model
+    model.eval()
+
+    with torch.no_grad(): #Obtaining the prediction
+        y = model(x)
+        y = torch.round(torch.sigmoid(y).squeeze(0)).item()
+        if y: 
+            print('H')
+        else: 
+            print('F')
+
+if __name__ == "__main__":
+    #Create CSV
+    # creat_TestCSV()
+    # creat_TrainingCSV()
+
+    model, scaler = train_BinaryClassificationModel()
+    save_BinaryClassificationModel(model, scaler)
+    model, scaler = load_BinaryClassificationModel("../../data/BinaryClassificationModel.pt", "../../data/BinaryClassificationScaler.pt")
+    useModel(model, scaler, [110.074607, 108.019277, 322.401576, 1873.313785]) #H
+    useModel(model, scaler, [188.91156, 243.643789, 283.640021, 1937.04209]) #F
+
+    
