@@ -113,10 +113,20 @@ Ce rapport contient l'ensemble des résultats obtenus, leurs interprétations ai
 
 {\section*{1. Exécution du code}}
 \addcontentsline{toc}{chapter}{1. Exécution du code/ Structure}
+Le fichier main.py doit être lancé depuis la racine du projet. Il en est de même pour les fichier utils.py et ml\_utils.py, il faut alors exécuter les commandes : "python src/main/utils.py" et "python src/main/ml\_utils.py". Les fichiers tests doivent quant à eux être exécuté depuis le dossier où ils sont stockés.
 {\subsection*{1.1 Librairies utilisées}}
 \addcontentsline{toc}{section}{1.1 Librairies utilisées}
+Afin de réaliser ce projet, nous avons été amenés à utiliser des librairies extérieures aux librairies de bases que nous proposait python :\\
+- audiofile : permet d'extraire le signal et la fréquence d'échantillonnage des fichiers audios.\\
+- numpy (version 1.20) : utilisée pour les différentes fonctions mathématiques. \\
+- scipy : utilisée pour avoir le signal et les transformées de Fourier. \\
+-pickle : utiliser pour sauvegarder et charger des objets. \\
+-pandas : utiliser pour lire les CSV .\\
+-torch : utiliser pour instancier le modèle de machine learning et le paramétrer. \\
+-sklearn : utiliser pour instancier le scaler. \\
 {\subsection*{1.2 Structure du code source}}
 \addcontentsline{toc}{section}{1.2 Structure du code source}
+Le projet est divisé en plusieurs dossiers. Le dossier racine contient un dossier data contenant l'ensemble des fichiers audio utilisés lors de la réalisation du projet ainsi que les données relatives au modèle de machine learning, et un dossier src contenant la source du programme (ce qui est utilisé par le programme en lui-même ainsi que les tests unitaires).
 
 {\section*{2. Caractéristiques étudiées}}
 	\addcontentsline{toc}{chapter}{2. Caractéristiques étudiées}
@@ -163,7 +173,10 @@ Voici les observations sur lesquelles nous avons basé notre raisonnement : \\
 \end{figure}
 {\subsection*{2.4 MFCCs}}
 \addcontentsline{toc}{section}{2.4 MFCCs}
+Les MFCCs représentent les activitées du conduit vocal durant la production de paroles. Afin de les extraire de nos fichiers audio, on a créé l'algorithme compute\_mfcc() prenant un fichier audio comme paramètre. Celui va d'abord extraire le signal et le normaliser. Puis, il va le faire passer par un filtre pass-haut et le diviser en frames de chacune 25ms. Sur chacune de ses frames, une fenêtre de Hamming va être appliquée. Ensuite, on va calculer le spectre de puissance du signal en utilisant l'équation donnée dans l'explication du projet. On changera l'échelle du spectre avec le "Mel\-Filter Bank". Comme les coefficients sont très corrélés, on leur applique une transformée en cosinus discrète, ce qui nous permettra d'avoir les MFCCs, mais on ne prendra que les 13 premiers.
+Malheureusement, malgré nos tests, nous avons pas pu trouver une façon de les utiliser pour différencier SLT et BDL.
 	
+\newpage
 {\section*{3. Systèmes basés sur des règles}}
 	\addcontentsline{toc}{chapter}{3. Systèmes basés sur des règles}
 Nous avons élaboré trois systèmes différents pour effectuer la classification homme/femme. Les trois systèmes fonctionnent de la même manière, ils doivent recevoir en paramètre un chemin menant vers un dossier qui contient au minimum 5 fichiers audio contenant des enregistrements de voix d'une même personne. Le système se charge d'appeler les méthodes pour en extraire les différentes caractéristiques et retourne le résultat, c'est à dire s'il détermine que c'est une femme ou un homme. Afin de tester la précision des systèmes, nous les avons exécuté 10 fois en leur donnant des fichiers des speakers BDL (homme), RMS (homme), SLT (femme) et CMS (femme). Nous avons récupérés son nombre de bonnes classifications et en avons calculé son rapport avec le nombre total de classifications. Plus précisément, nous avons calculé la précision métrique de chaque système sur base d'enregistrements de BDL, RMS, SLT et CMS.
@@ -210,7 +223,16 @@ Le système numéro 3 est implémenté dans la fonction system\_03() et utilise 
 Les résultats du système sont bons pour BDL, SLT, RMS et CMS.
 {\section*{4. Machine learning}}
 \addcontentsline{toc}{chapter}{4. Machine learning}
-
+N'ayant jamais fait de machine learning auparavant, nous avons suivi un tutoriel trouvé en ligne que nous avons adapté au projet. \\
+Ce tutoriel nous a montré comment utiliser un réseau neuronale implémentant la classification binaire. La classification binaire nous a parue parfaite pour notre problème étant donné que nous n'avons que 2 possibilités de genre : Homme ou Femme. Tout le code de la partie Machine Learning se trouve dans le fichier ml\_utils.py\\
+Pour utiliser ce modèle, nous devons lui donner des features en entrée. Ces features permettront au modèle de prendre une décision quant-au genre de la personne parlant dans le fichier audio. Ces features sont au nombre de 4, nous avons pris "autocorrelation pitch", "cepstrum pitch", "formant 1" et "formant 2", ces features sont calculées dans la fonction analyse\_ml(path, firstAudioName) où path est le chemin d'accès au dossier contenant les fichiers audio en .wav et firstAudioName est le nom du fichier a analyser. Une fois ces features calculées pour l'audio, nous ajoutons un label à cet audio, le label dans notre cas est le sexe de la personne qui parle et équivaut à (Homme = 1 | Femme = 0). Nous répétons l'opération pour tous les fichiers des dossiers bdl\_a, bdl\_b, slt\_a ainsi que slt\_b et plaçons tout dans un fichier CSV grâce à la fonction create\_TrainingCSV(). Ce fichier sera le fichier d'entrainement de notre modèle.
+En répétant cette manipulation avec les dossiers rms\_a, rms\_b, cms\_a ainsi que cms\_b en passant par la fonction create\_TestCSV() nous créons le fichier de test de notre modèle, ce fichier permettra de tester la validité de la classification de notre modèle. Pour créer notre modèle, nous devons charger les 2 fichiers CSV créés précédement, le fichier d'entrainement (training.csv) et le fichier de test (test.csv). Pour passer les features au modèle nous allons enlever les dernière colonnes des fichiers qui stockent le résultat attendu et les sauvegarder dans des variables (y\_train et y\_test) pour comparer le résultat du modèle plus tard.
+Nous allons ensuite instancier un "scaler" pour normaliser nos features d'entrées pour les données d'entrainement et les données de test. Nous fixons le nombre d'EPOCHS (nombre de fois que nous faisons passer le jeux de données d'entrainement au modèle) à 10 car suite à plusieurs essaies, nous avons remarqué que 10 était suffisant et raisonnable. Le BATCH\_SIZE est fixé à 64, ainsi nous envoyons des "paquets" de 64 lignes du CSV de test au modèle lorsqu'il s'entraine. Le dernier BATCH envoyé est inférieur ou égal à 64.
+Le LEARNING\_RATE est fixé à 0,001 comme dans le tutoriel. Nous créons ensuite notre "BinaryClassification" modèle en l'instanciant. Le modèle s'entraine ensuite, il effectue une boucle qui lui permet d'optimiser ses WEIGHTs (poids entre les noeuds) et ses BIAS (poids des noeuds) à chaque itération en vérifiant le taux d'erreur qu'il fait. Le taux d'erreur est calculé en comparant la prédiction du vrai label du jeu de test. Une fois le modèle entrainé, il faut savoir le sauvegarder et le charger pour pouvoir l'utiliser, nous utilisons donc la fonction save\_BinaryClassificationModel(model, scaler) pour sauver notre modèle et le scaler, la fonction prend en paramètre le modèle a sauvegarder ainsi que le scaler lié à ce modèle. Pour charger le modèle nous utilisons la fonction load\_BinaryClassificationModel(pathModel, pathScaler) qui retourne le modèle ainsi que le scaler lié au modèle. La fonction prend en paramètres le chemin d'accès au modèle ainsi que le chemin d'accès au scaler.
+Pour utiliser le modèle que nous avons entrainé, il suffit d'utiliser la fonction useModel(model, scaler, inputs), avec en paramètre le modèle a utiliser, le scaler associé et une list ([..., ..., ..., ...]) contenant les 4 features d'entrée du modèle. Le modèle prédira si c'est un homme ou une femme en sortie. Le modèle a une efficacité de 100\%, cette manière de faire est plus efficace qu'en essayant plusieurs poids pour chaque feature "à la main" car les poids sont optimisé par le modèle. Celui donne directement la combinaison optimale afin d'optimiser la précision de la classification.\\
+Voici le lien du tutoriel sur lequel notre implémentation de la classification binaire s'est basée : \\
+\noindent
+\url{https://towardsdatascience.com/pytorch-tabular-binary-classification-a0368da5bb89}
 \end{document}
 
 
