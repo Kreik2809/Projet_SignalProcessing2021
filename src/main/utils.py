@@ -3,9 +3,8 @@ import numpy as np
 import numpy.lib.stride_tricks as npst
 import matplotlib.pyplot as plt
 from scipy import signal, fft
-import glob, os, random, sys
+import glob, os, random
 
-import scipy
 import xcorr
 import scikit_talkbox_lpc as scilpc
 import filterbanks
