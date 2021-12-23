@@ -11,7 +11,7 @@ from torch.utils.data import Dataset, DataLoader
 
 from sklearn.preprocessing import StandardScaler
 
-def analyse2(path, firstAudioName):
+def analyse_ml(path, firstAudioName):
     """
     This function is called to compute easily all the features of signals.
     Because of the cepstrum and autocorrelation pitch estimation requirements, path must point to
@@ -20,7 +20,7 @@ def analyse2(path, firstAudioName):
     os.chdir("../../")
     os.chdir(path)
     globfiles = random.sample(glob.glob("*.wav"), 4)
-    files = glob.glob(firstAudio) + globfiles
+    files = glob.glob(firstAudioName) + globfiles
     print(files)
     autocorr_pitch = utils.autocorrelation_pitch_estim(files)
     cepstrum_pitch = utils.cepstrum_pitch_estim(files)
@@ -40,7 +40,7 @@ def analyse2(path, firstAudioName):
     return autocorr_pitch, cepstrum_pitch, f1_list, f2_list
 
 
-def creat_TrainingCSV():
+def create_TrainingCSV():
     """
     This function is called to easily create a csv with training data.
     This csv will then be passed to the AI to train its model.
@@ -51,33 +51,33 @@ def creat_TrainingCSV():
     print("START")
 
     for filename in os.listdir("../../data/bdl_a/"): #Homme
-        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse2("data/bdl_a", filename)
+        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse_ml("data/bdl_a", filename)
         res = [autocorr_pitch, cepstrum_pitch, np.mean(f1_list), np.mean(f2_list), 1]
         data.append(res)
     
     for filename in os.listdir("../../data/bdl_b/"): #Homme
-        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse2("data/bdl_b", filename)
+        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse_ml("data/bdl_b", filename)
         res = [autocorr_pitch, cepstrum_pitch, np.mean(f1_list), np.mean(f2_list), 1]
         data.append(res)
 
     for filename in os.listdir("../../data/slt_a/"): #Femme
-        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse2("data/slt_a", filename)
+        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse_ml("data/slt_a", filename)
         res = [autocorr_pitch, cepstrum_pitch, np.mean(f1_list), np.mean(f2_list), 0]
         data.append(res)
     
     for filename in os.listdir("../../data/slt_b/"): #Femme
-        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse2("data/slt_b", filename)
+        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse_ml("data/slt_b", filename)
         res = [autocorr_pitch, cepstrum_pitch, np.mean(f1_list), np.mean(f2_list), 0]
         data.append(res)
 
-    with open('data.csv', 'w', encoding='UTF8', newline='') as f:
+    with open('training.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(header)
         writer.writerows(data)
     
     print("FINISH")
 
-def creat_TestCSV():
+def create_TestCSV():
     """
     This function is called to easily create a csv with testing data.
     This csv will then be passed to the AI to test its model.
@@ -88,33 +88,33 @@ def creat_TestCSV():
     print("START")
 
     for filename in os.listdir("../../data/rms_a/"): #Homme
-        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse2("data/rms_a", filename)
+        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse_ml("data/rms_a", filename)
         res = [autocorr_pitch, cepstrum_pitch, np.mean(f1_list), np.mean(f2_list), 1]
         data.append(res)
     
     for filename in os.listdir("../../data/rms_b/"): #Homme
-        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse2("data/rms_b", filename)
+        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse_ml("data/rms_b", filename)
         res = [autocorr_pitch, cepstrum_pitch, np.mean(f1_list), np.mean(f2_list), 1]
         data.append(res)
 
     for filename in os.listdir("../../data/cms_a/"): #Femme
-        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse2("data/cms_a", filename)
+        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse_ml("data/cms_a", filename)
         res = [autocorr_pitch, cepstrum_pitch, np.mean(f1_list), np.mean(f2_list), 0]
         data.append(res)
     
     for filename in os.listdir("../../data/cms_b/"): #Femme
-        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse2("data/cms_b", filename)
+        autocorr_pitch, cepstrum_pitch, f1_list, f2_list = analyse_ml("data/cms_b", filename)
         res = [autocorr_pitch, cepstrum_pitch, np.mean(f1_list), np.mean(f2_list), 0]
         data.append(res)
 
-    with open('data2.csv', 'w', encoding='UTF8', newline='') as f:
+    with open('test.csv', 'w', encoding='UTF8', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(header)
         writer.writerows(data)
     
     print("FINISH")
 
-###Artificial intelligence###
+###Machile learning algorithm : Binary Classification###
 
 ##Train data
 class TrainData(Dataset):
@@ -177,8 +177,8 @@ def binary_acc(y_pred, y_test):
 
 def train_BinaryClassificationModel():
     #Read CSV
-    training_data = pd.read_csv("../../data/data.csv") #Sexe : Men = 1 | Women = 0
-    test_data = pd.read_csv("../../data/data2.csv") #Sexe : Men = 1 | Women = 0
+    training_data = pd.read_csv("../../data/ml_data/training.csv") #Sexe : Men = 1 | Women = 0
+    test_data = pd.read_csv("../../data/ml_data/test.csv") #Sexe : Men = 1 | Women = 0
 
     #We choose input features and label in csv files for the training and the test 
     X_train = training_data.iloc[:, :-1]
@@ -246,8 +246,8 @@ def train_BinaryClassificationModel():
     return model, scaler
 
 def save_BinaryClassificationModel(model, scaler):
-    torch.save(model.state_dict(), "../../data/BinaryClassificationModel.pt")
-    fileScaler = open("../../data/BinaryClassificationScaler.pt", 'wb') 
+    torch.save(model.state_dict(), "../../data/ml_data/BinaryClassificationModel.pt")
+    fileScaler = open("../../data/ml_data/BinaryClassificationScaler.pt", 'wb') 
     pickle.dump(scaler, fileScaler)
 
 
@@ -277,12 +277,12 @@ def useModel(model, scaler, inputs):
 
 if __name__ == "__main__":
     #Create CSV
-    # creat_TestCSV()
-    # creat_TrainingCSV()
+    #create_TestCSV()
+    #create_TrainingCSV()
 
-    # model, scaler = train_BinaryClassificationModel()
-    # save_BinaryClassificationModel(model, scaler)
-    model, scaler = load_BinaryClassificationModel("../../data/BinaryClassificationModel.pt", "../../data/BinaryClassificationScaler.pt")
+    #model, scaler = train_BinaryClassificationModel()
+    #save_BinaryClassificationModel(model, scaler)
+    model, scaler = load_BinaryClassificationModel("../../data/ml_data/BinaryClassificationModel.pt", "../../data/ml_data/BinaryClassificationScaler.pt")
     useModel(model, scaler, [110.074607, 108.019277, 322.401576, 1873.313785]) #H
     useModel(model, scaler, [188.91156, 243.643789, 283.640021, 1937.04209]) #F
 
