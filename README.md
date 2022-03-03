@@ -1,2 +1,2 @@
 # Projet_SignalProcessing2021
-Speaker-classification 
+Speaker-classification application using signal processing.
